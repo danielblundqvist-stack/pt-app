@@ -1,13 +1,78 @@
 <!doctype html>
 <html lang="sv">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PT-app</title>
-    <meta name="theme-color" content="#111111" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PT-app</title>
+<meta name="theme-color" content="#111111" />
+<style>
+:root{--bg:#f4f4f5;--card:#fff;--text:#111;--muted:#666;--line:#e7e7e7;--dark:#111;--green:#0f7b38}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+.page{max-width:1100px;margin:0 auto;padding:16px}.card{background:#fff;border-radius:22px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.hero{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.hero h1{margin:0;font-size:30px}.hero p{margin:6px 0 0;color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}
+.stack{display:flex;flex-direction:column;gap:14px}.muted{color:var(--muted);font-size:14px}.big{font-size:22px;font-weight:700}
+.progress{height:10px;border-radius:999px;background:#eee;overflow:hidden;margin-top:12px}.bar{height:100%;background:#111;width:0%}
+.week{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.day{border:1px solid var(--line);border-radius:16px;padding:12px;text-align:left;background:#fff;cursor:pointer}
+.day.active{background:#111;color:#fff;border-color:#111}.day .small{font-size:12px;color:var(--muted)}.day.active .small{color:#d6d6d6}
+.row{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;border-radius:14px;padding:10px 14px;cursor:pointer}
+.btn.dark,.btn.green{background:#111;color:#fff;border-color:#111}.btn.green{width:100%;padding:13px 16px;font-weight:700}
+.exercise{border:1px solid var(--line);border-radius:18px;padding:14px;background:#fff}.exercise.done{background:#fafafa}
+.exercise-head,.between{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.title{font-weight:700}.tiny{font-size:12px;color:var(--muted)}
+.check{width:34px;height:34px;border:1px solid var(--line);border-radius:999px;background:#fff;cursor:pointer}.check.on{background:#eaf7ee;border-color:#d0ecd9;color:var(--green);font-weight:700}
+input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;font:inherit}.exercise-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:10px;margin-top:12px}
+.mini,.history-item,.tip{background:#f6f6f6;border-radius:14px;padding:12px}.trend-row{margin-top:10px}.trend-meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:4px}
+.mini-bar{height:8px;background:#ececec;border-radius:999px;overflow:hidden}.mini-fill{height:100%;background:#111}
+@media (max-width:900px){.grid3,.layout{grid-template-columns:1fr}.week{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.week,.exercise-grid{grid-template-columns:1fr}.hero{flex-direction:column;align-items:flex-start}.hero h1{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="card hero"><div><h1>Din privata PT-app</h1><p>Enkel webbapp för mobilen. Öppna, logga, klart.</p></div><div class="muted">20–30 min morgonträning</div></div>
+  <div class="grid3">
+    <div class="card"><div class="muted">Rekommenderat idag</div><div id="todayLabel" class="big"></div><div class="muted">Appen flyttar dig till nästa ofärdiga pass.</div></div>
+    <div class="card"><div class="muted">Passprogress</div><div id="progressText" class="big">0/0 övningar klara</div><div class="progress"><div id="progressBar" class="bar"></div></div></div>
+    <div class="card"><div class="muted">Vilotimer</div><div id="timerText" class="big">Klar</div><div class="row" style="margin-top:10px"><button class="btn" onclick="setTimer(30)">30 s</button><button class="btn" onclick="setTimer(45)">45 s</button><button class="btn" onclick="setTimer(60)">60 s</button></div></div>
+  </div>
+  <div class="layout">
+    <div class="stack">
+      <div class="card"><h2>Veckoplan</h2><div id="week" class="week"></div></div>
+      <div class="card"><div class="between" style="margin-bottom:8px"><h2 style="margin:0">Dagens pass</h2><button id="startBtn" class="btn">Starta pass</button></div><div id="exercises" class="stack"></div><button class="btn green" onclick="saveWorkout()">Spara passet</button></div>
+    </div>
+    <div class="stack">
+      <div class="card"><h2>Daglig check-in</h2><div class="stack"><input id="weightToday" placeholder="Vikt idag" /><input id="waistToday" placeholder="Midjemått" /><input id="energyToday" placeholder="Energi 1–10" /><input id="nightSession" placeholder="Kvällspass? t.ex. promenad, tennis, inget" /></div></div>
+      <div class="card"><h2>Trend</h2><div class="mini"><div class="title">Vikt senaste passen</div><div id="weightTrend" class="stack"></div></div><div class="mini" style="margin-top:10px"><div class="title">Midja senaste passen</div><div id="waistTrend" class="stack"></div></div></div>
+      <div class="card"><h2>Historik</h2><div id="history" class="stack"></div></div>
+      <div class="card"><h2>PT-insikter</h2><div class="stack"><div class="tip">Missat en dag? Kör bara nästa rekommenderade pass överst i appen.</div><div class="tip">Lätt = höj 5 kg nästa gång. Lagom = höj 2,5 kg. Tungt = behåll vikten.</div><div class="tip">Kvällspass kan du skriva in i check-in så har vi enkel logg för nästa justering.</div></div></div>
+    </div>
+  </div>
+</div>
+<script>
+const weeklyPlan=[{key:"monday",label:"Måndag",title:"Push",short:"Bröst, axlar, triceps"},{key:"tuesday",label:"Tisdag",title:"Ben",short:"Knäböj, höft, lår"},{key:"wednesday",label:"Onsdag",title:"Pull",short:"Rygg, biceps"},{key:"thursday",label:"Torsdag",title:"Helkropp",short:"Tempo + puls"},{key:"friday",label:"Fredag",title:"Flex",short:"Missat pass / kondition"}];
+const fullProgram={monday:[{name:"Bänkpress",weight:50,reps:8,sets:3,rest:60},{name:"Armhävningar",weight:0,reps:12,sets:3,rest:45},{name:"Lutande hantelpress",weight:18,reps:10,sets:3,rest:60},{name:"Axelpress",weight:16,reps:10,sets:3,rest:60},{name:"Sidolyft",weight:7,reps:12,sets:2,rest:45}],tuesday:[{name:"Knäböj",weight:50,reps:8,sets:3,rest:75},{name:"Utfall",weight:12,reps:10,sets:3,rest:60},{name:"Raka marklyft",weight:45,reps:10,sets:3,rest:75},{name:"Höftlyft",weight:40,reps:12,sets:3,rest:60},{name:"Wall sit",weight:0,reps:45,sets:2,rest:45,unit:"sek"}],wednesday:[{name:"Skivstångsrodd",weight:55,reps:8,sets:3,rest:60},{name:"Hantelrodd",weight:24,reps:10,sets:3,rest:60},{name:"Omvända flyes",weight:7,reps:12,sets:3,rest:45},{name:"Bicepscurl",weight:11,reps:10,sets:3,rest:45},{name:"Farmers walk",weight:28,reps:30,sets:3,rest:45,unit:"sek"}],thursday:[{name:"Knäböj",weight:50,reps:10,sets:3,rest:30},{name:"Armhävningar",weight:0,reps:12,sets:3,rest:30},{name:"Rodd",weight:45,reps:10,sets:3,rest:30},{name:"Axelpress",weight:16,reps:10,sets:3,rest:30},{name:"Planka",weight:0,reps:30,sets:3,rest:30,unit:"sek"}],friday:[{name:"Cykel eller löpband",weight:0,reps:20,sets:1,rest:0,unit:"min"},{name:"Mage",weight:0,reps:12,sets:3,rest:30},{name:"Axelpress lätt",weight:12,reps:12,sets:2,rest:45}]};
+const dayMap=["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]; let state={day:"monday",started:false,timer:0,tick:null};
+function todayKey(){const d=dayMap[new Date().getDay()]; return ["monday","tuesday","wednesday","thursday","friday"].includes(d)?d:"monday";}
+function sKey(k){return "ptsimple:"+k} function parseNum(v){if(!v)return null; const m=String(v).match(/(\d+(?:[.,]\d+)?)/); return m?Number(m[1].replace(",", ".")):null}
+function getDone(day, ex){return localStorage.getItem(sKey(`done:${day}:${ex}`))==="1"} function setDone(day, ex, v){localStorage.setItem(sKey(`done:${day}:${ex}`), v?"1":"0")}
+function getLog(day, ex){return localStorage.getItem(sKey(`log:${day}:${ex}`))||""} function setLog(day, ex, v){localStorage.setItem(sKey(`log:${day}:${ex}`), v)}
+function getFb(day, ex){return localStorage.getItem(sKey(`fb:${day}:${ex}`))||""} function setFb(day, ex, v){localStorage.setItem(sKey(`fb:${day}:${ex}`), v)}
+function nextWeight(ex){if(!ex.weight)return "Samma"; const fb=getFb(state.day, ex.name); if(fb==="Lätt") return `${ex.weight+5} kg`; if(fb==="Lagom") return `${ex.weight+2.5} kg`; return `${ex.weight} kg`}
+function nextIncompleteDay(){for(const d of weeklyPlan){const allDone=(fullProgram[d.key]||[]).every(ex=>getDone(d.key, ex.name)); if(!allDone) return d.key} return todayKey()}
+function renderWeek(){const el=document.getElementById("week"); el.innerHTML=""; weeklyPlan.forEach(d=>{const b=document.createElement("button"); b.className="day"+(state.day===d.key?" active":""); b.innerHTML=`<div class="title">${d.label}</div><div>${d.title}</div><div class="small">${d.short}</div>`; b.onclick=()=>{state.day=d.key; render()}; el.appendChild(b)})}
+function renderExercises(){const wrap=document.getElementById("exercises"); wrap.innerHTML=""; (fullProgram[state.day]||[]).forEach((ex,i)=>{const done=getDone(state.day, ex.name); const box=document.createElement("div"); box.className="exercise"+(done?" done":""); box.innerHTML=`<div class="exercise-head"><div><div class="title">${i+1}. ${ex.name}</div><div class="muted">Mål: ${ex.sets} set x ${ex.reps} ${ex.unit||"reps"} ${ex.weight?`@ ${ex.weight} kg`:""}</div><div class="tiny">Vila: ${ex.rest} sek</div></div><button class="check ${done?"on":""}">✓</button></div><div class="exercise-grid"><input value="${getLog(state.day, ex.name).replaceAll('"','&quot;')}" placeholder="${state.started?'T.ex. 55 x 8, 8, 8':'Vad körde du?'}" /><div class="row"><button class="btn ${getFb(state.day, ex.name)==='Lätt'?'dark':''}">Lätt</button><button class="btn ${getFb(state.day, ex.name)==='Lagom'?'dark':''}">Lagom</button><button class="btn ${getFb(state.day, ex.name)==='Tungt'?'dark':''}">Tungt</button></div></div><div class="between" style="margin-top:12px"><div class="muted">Nästa gång: <strong>${nextWeight(ex)}</strong></div><button class="btn">Starta vila</button></div>`;
+const buttons=box.querySelectorAll("button"); buttons[0].onclick=()=>{setDone(state.day, ex.name, !done); render()}; box.querySelector("input").oninput=e=>setLog(state.day, ex.name, e.target.value); buttons[1].onclick=()=>{setFb(state.day, ex.name, "Lätt"); render()}; buttons[2].onclick=()=>{setFb(state.day, ex.name, "Lagom"); render()}; buttons[3].onclick=()=>{setFb(state.day, ex.name, "Tungt"); render()}; buttons[4].onclick=()=>setTimer(ex.rest); wrap.appendChild(box)})}
+function renderTop(){const rec=weeklyPlan.find(d=>d.key===nextIncompleteDay()); document.getElementById("todayLabel").textContent=`${rec.label} – ${rec.title}`; const plan=fullProgram[state.day]||[]; const done=plan.filter(ex=>getDone(state.day, ex.name)).length; document.getElementById("progressText").textContent=`${done}/${plan.length} övningar klara`; document.getElementById("progressBar").style.width=`${plan.length?Math.round((done/plan.length)*100):0}%`; document.getElementById("timerText").textContent=state.timer>0?fmt(state.timer):"Klar"; document.getElementById("startBtn").textContent=state.started?"Avsluta passläge":"Starta pass"}
+function renderTrends(){const history=JSON.parse(localStorage.getItem(sKey("history"))||"[]"); const wEl=document.getElementById("weightTrend"), waEl=document.getElementById("waistTrend"); wEl.innerHTML=""; waEl.innerHTML=""; const weights=history.map(h=>({date:h.date.slice(5),value:parseNum(h.weightToday)})).filter(x=>x.value!==null).slice(0,7).reverse(); const waists=history.map(h=>({date:h.date.slice(5),value:parseNum(h.waistToday)})).filter(x=>x.value!==null).slice(0,7).reverse(); const maxW=Math.max(...weights.map(x=>x.value),0), maxWa=Math.max(...waists.map(x=>x.value),0);
+if(!weights.length) wEl.innerHTML='<div class="muted">Ingen data ännu</div>'; else weights.forEach(item=>{const div=document.createElement("div"); div.className="trend-row"; div.innerHTML=`<div class="trend-meta"><span>${item.date}</span><span>${item.value}</span></div><div class="mini-bar"><div class="mini-fill" style="width:${maxW?(item.value/maxW)*100:0}%"></div></div>`; wEl.appendChild(div)});
+if(!waists.length) waEl.innerHTML='<div class="muted">Ingen data ännu</div>'; else waists.forEach(item=>{const div=document.createElement("div"); div.className="trend-row"; div.innerHTML=`<div class="trend-meta"><span>${item.date}</span><span>${item.value}</span></div><div class="mini-bar"><div class="mini-fill" style="width:${maxWa?(item.value/maxWa)*100:0}%"></div></div>`; waEl.appendChild(div)})}
+function renderHistory(){const history=JSON.parse(localStorage.getItem(sKey("history"))||"[]"); const el=document.getElementById("history"); el.innerHTML=""; if(!history.length){el.innerHTML='<div class="history-item muted">När du sparar ditt första pass dyker det upp här.</div>'; return} history.slice(0,5).forEach(h=>{const div=document.createElement("div"); div.className="history-item"; div.innerHTML=`<div class="between"><div><div class="title">${h.dayLabel}</div><div class="tiny">${h.date}</div></div><div class="tiny">Energi: ${h.energyToday||"-"}</div></div><div class="stack" style="margin-top:10px">${(h.exercises||[]).slice(0,3).map(ex=>`<div class="between"><span>${ex.name}</span><span class="tiny">${ex.log||ex.next}</span></div>`).join("")}</div>`; el.appendChild(div)})}
+function loadDaily(){["weightToday","waistToday","energyToday","nightSession"].forEach(id=>{const el=document.getElementById(id); el.value=localStorage.getItem(sKey(id))||""; el.oninput=e=>localStorage.setItem(sKey(id), e.target.value)})}
+function saveWorkout(){const entry={date:new Date().toISOString().slice(0,10), day:state.day, dayLabel:(weeklyPlan.find(d=>d.key===state.day)||{}).label||state.day, weightToday:document.getElementById("weightToday").value, waistToday:document.getElementById("waistToday").value, energyToday:document.getElementById("energyToday").value, nightSession:document.getElementById("nightSession").value, exercises:(fullProgram[state.day]||[]).map(ex=>({name:ex.name, log:getLog(state.day, ex.name), feedback:getFb(state.day, ex.name), next:nextWeight(ex)}))}; const history=JSON.parse(localStorage.getItem(sKey("history"))||"[]"); localStorage.setItem(sKey("history"), JSON.stringify([entry,...history].slice(0,20))); alert("Pass sparat."); state.day=nextIncompleteDay(); render()}
+function setTimer(sec){state.timer=sec; if(state.tick) clearInterval(state.tick); state.tick=setInterval(()=>{state.timer--; renderTop(); if(state.timer<=0){clearInterval(state.tick); state.tick=null; state.timer=0; renderTop()}},1000); renderTop()}
+function fmt(sec){const m=Math.floor(sec/60).toString().padStart(2,"0"); const s=(sec%60).toString().padStart(2,"0"); return `${m}:${s}`}
+function render(){renderWeek(); renderTop(); renderExercises(); renderTrends(); renderHistory(); loadDaily()}
+document.getElementById("startBtn").onclick=()=>{state.started=!state.started; render()}; state.day=nextIncompleteDay(); render();
+</script>
+</body>
 </html>
