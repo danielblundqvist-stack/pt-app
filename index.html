@@ -3,106 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PT-app v3</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<title>Din privata PT-app v3</title>
 <style>
-body{font-family:system-ui;margin:0;background:#f4f4f5}
-.page{max-width:1100px;margin:auto;padding:16px}
-.card{background:white;border-radius:16px;padding:12px;margin-bottom:12px}
-.btn{border:1px solid #ccc;padding:8px;border-radius:8px;cursor:pointer}
-input{width:100%;padding:8px;margin-top:6px}
+*{box-sizing:border-box}body{margin:0;background:#f4f4f5;color:#111;font-family:system-ui,-apple-system,Segoe UI,sans-serif}.page{max-width:1120px;margin:auto;padding:16px}.card{background:#fff;border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:0 1px 2px #0001}.hero{display:flex;justify-content:space-between;gap:12px;align-items:center}.hero h1{margin:0;font-size:30px}.muted{color:#666;font-size:14px}.big{font-size:22px;font-weight:750}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.layout{display:grid;grid-template-columns:1.1fr .9fr;gap:14px}.stack{display:flex;flex-direction:column;gap:14px}.week{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.day,.btn{border:1px solid #e7e7e7;background:#fff;border-radius:14px;padding:10px 14px;cursor:pointer;text-decoration:none;color:#111;display:inline-block}.day{text-align:left}.active,.dark{background:#111!important;color:#fff!important;border-color:#111!important}.small{font-size:12px;color:#666}.active .small{color:#ddd}.exercise,.history,.tip{border:1px solid #e7e7e7;border-radius:18px;padding:14px;background:#fff}.done{background:#fafafa}.between{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.title{font-weight:750}.tiny{font-size:12px;color:#666}.badge{display:inline-block;background:#f1f1f1;border-radius:999px;padding:4px 8px;font-size:12px;color:#444;margin-left:6px}.check{width:34px;height:34px;border-radius:999px}.on{background:#eaf7ee;color:#0f7b38;border-color:#d0ecd9;font-weight:750}input{width:100%;padding:12px 14px;border:1px solid #e7e7e7;border-radius:14px;font:inherit}.exgrid{display:grid;grid-template-columns:1.2fr .8fr;gap:10px;margin-top:12px}.row{display:flex;gap:8px;flex-wrap:wrap}.save{background:#111;color:#fff;width:100%;padding:13px 16px;font-weight:750}.danger{color:#b42318;border-color:#f2c6c2}.success{display:none;background:#eaf7ee;color:#0f7b38;border:1px solid #d0ecd9;border-radius:14px;padding:12px;margin-bottom:12px}.progress{height:10px;border-radius:999px;background:#eee;overflow:hidden;margin-top:12px}.bar{height:100%;background:#111}.chart{height:180px;border-radius:14px;background:#f6f6f6;padding:12px}.bars{display:flex;align-items:flex-end;gap:8px;height:120px;margin-top:8px}.barcol{flex:1;background:#111;border-radius:8px 8px 0 0;min-height:4px}.labels{display:flex;gap:8px;font-size:10px;color:#666}.labels span{flex:1;text-align:center}@media(max-width:900px){.grid,.layout{grid-template-columns:1fr}.week{grid-template-columns:1fr 1fr}}@media(max-width:620px){.week,.exgrid{grid-template-columns:1fr}.hero{flex-direction:column;align-items:flex-start}.hero h1{font-size:24px}}
 </style>
 </head>
-
 <body>
 <div class="page">
-
-<h2>Din PT-app v3</h2>
-
-<div class="card">
-<h3>Check-in</h3>
-<input id="weight" placeholder="Vikt">
-<input id="waist" placeholder="Midja">
-<input id="energy" placeholder="Energi">
-<button class="btn" onclick="saveCheckin()">Spara</button>
-</div>
-
-<div class="card">
-<h3>Push</h3>
-<div>Bänkpress</div>
-<div>Lutande hantelpress</div>
-<div>Axelpress</div>
-<div>Triceps</div>
-<div>Planka</div>
-</div>
-
-<div class="card">
-<h3>Pull</h3>
-<div>Rodd</div>
-<div>Omvända flyes</div>
-<div>Biceps</div>
-<div>Sidoplanka</div>
-</div>
-
-<div class="card">
-<h3>Historik</h3>
-<div id="history"></div>
-</div>
-
-<div class="card">
-<h3>Vikt</h3>
-<canvas id="weightChart"></canvas>
-</div>
-
-<div class="card">
-<h3>Midja</h3>
-<canvas id="waistChart"></canvas>
-</div>
-
-</div>
-
+<div class="card hero"><div><h1>Din privata PT-app v3</h1><div class="muted">Justerat program: mindre ryggvolym, mer armar, bättre uppföljning.</div></div><div class="muted">20-30 min morgonträning</div></div>
+<div id="msg" class="success">Passet är sparat. Fälten är rensade och passet finns i historiken.</div>
+<div class="grid"><div class="card"><div class="muted">Rekommenderat idag</div><div id="today" class="big"></div><div class="muted">Nästa ofärdiga pass.</div></div><div class="card"><div class="muted">Passprogress</div><div id="progText" class="big"></div><div class="progress"><div id="progBar" class="bar"></div></div></div><div class="card"><div class="muted">Vilotimer</div><div id="timer" class="big">Klar</div><div class="row" style="margin-top:10px"><button class="btn" onclick="setTimer(30)">30 s</button><button class="btn" onclick="setTimer(45)">45 s</button><button class="btn" onclick="setTimer(60)">60 s</button><button class="btn" onclick="setTimer(75)">75 s</button></div></div></div>
+<div class="layout"><div class="stack"><div class="card"><h2>Veckoplan</h2><div id="week" class="week"></div></div><div class="card"><div class="between" style="margin-bottom:10px"><h2 style="margin:0">Dagens pass</h2><button id="start" class="btn">Starta pass</button></div><div id="exercises" class="stack"></div><button class="btn save" onclick="saveWorkout()">Spara passet</button></div></div>
+<div class="stack"><div class="card"><h2>Daglig check-in</h2><div class="stack"><input id="weight" placeholder="Vikt idag"><input id="waist" placeholder="Midjemått"><input id="energy" placeholder="Energi 1-10"><input id="night" placeholder="Kvällspass?"></div></div><div class="card"><h2>Vikt</h2><div id="weightChart" class="chart"></div></div><div class="card"><h2>Midja</h2><div id="waistChart" class="chart"></div></div><div class="card"><h2>Historik</h2><div class="muted" style="margin-bottom:8px">Felaktigt sparat pass? Tryck Ta bort.</div><div id="history" class="stack"></div></div><div class="card"><h2>PT-insikter</h2><div class="stack"><div class="tip">Mindre ryggvolym än tidigare, eftersom ryggen redan är en stark sida.</div><div class="tip">Mer biceps/triceps för tydligare armutveckling.</div><div class="tip">Vikt och midja sparas nu i historiken och visas i enkla grafer.</div></div></div></div></div></div>
 <script>
-
-function saveCheckin(){
-  const entry = {
-    date: new Date().toISOString().slice(0,10),
-    weight: document.getElementById("weight").value,
-    waist: document.getElementById("waist").value,
-    energy: document.getElementById("energy").value
-  }
-
-  let history = JSON.parse(localStorage.getItem("history") || "[]")
-  history.unshift(entry)
-  localStorage.setItem("history", JSON.stringify(history))
-
-  render()
-}
-
-function render(){
-  let history = JSON.parse(localStorage.getItem("history") || "[]")
-
-  document.getElementById("history").innerHTML =
-    history.map(h => `${h.date} – ${h.weight}kg / ${h.waist}cm`).join("<br>")
-
-  const weights = history.map(h => Number(h.weight)).reverse()
-  const waists = history.map(h => Number(h.waist)).reverse()
-  const labels = history.map(h => h.date).reverse()
-
-  new Chart(document.getElementById("weightChart"), {
-    type: "line",
-    data: {labels, datasets: [{label:"Vikt", data: weights}]}
-  })
-
-  new Chart(document.getElementById("waistChart"), {
-    type: "line",
-    data: {labels, datasets: [{label:"Midja", data: waists}]}
-  })
-}
-
-render()
-
+const weekly=[["monday","Måndag","Push + triceps","Bröst, axlar, triceps + bål"],["tuesday","Tisdag","Ben + bål","Ben, säte, mage"],["wednesday","Onsdag","Pull + biceps","Ryggunderhåll, biceps, baksida axel"],["thursday","Torsdag","Helkropp + armar","Tempo, puls, armar"],["friday","Fredag","Flex","Kondition / missat pass + mage"]];
+const P={monday:[["Bänkpress",50,8,3,60,"",0],["Lutande hantelpress",18,10,3,60,"",0],["Axelpress",16,10,3,60,"",0],["Smal armhävning",0,10,3,45,"",2],["Triceps bakom huvud",10,12,3,45,"",2],["Planka",0,35,2,30,"sek",1]],tuesday:[["Knäböj",50,8,3,75,"",0],["Utfall",12,10,3,60,"/ben",0],["Raka marklyft",45,10,3,75,"",0],["Höftlyft",40,12,3,60,"",0],["Reverse crunch",0,12,2,30,"",1],["Sidoplanka",0,25,2,30,"sek/sida",1]],wednesday:[["Skivstångsrodd",50,8,3,60,"",3],["Omvända flyes",7,12,3,45,"",3],["Bicepscurl",11,10,3,45,"",2],["Hammercurl",10,10,2,45,"",2],["Farmers walk",28,30,2,45,"sek",0],["Dead bug",0,10,2,30,"/sida",1]],thursday:[["Goblet squat / lätt knäböj",24,12,2,45,"",0],["Armhävningar",0,12,3,30,"",0],["Axelpress lätt",14,10,2,45,"",0],["Bicepscurl lätt",9,12,2,30,"",2],["Triceps dips mot bänk",0,10,2,30,"",2],["Mountain climbers",0,30,2,30,"sek",1]],friday:[["Cykel eller löpband",0,20,1,0,"min",0],["Mage: crunch",0,15,3,30,"",1],["Mage: benlyft",0,10,3,30,"",1],["Rörlighet höft/bröstrygg",0,5,1,0,"min",0]]};
+let state={day:"monday",started:false,t:0,int:null};const K=x=>"ptv3:"+x;
+function get(k){return localStorage.getItem(K(k))||""}function set(k,v){localStorage.setItem(K(k),v)}function del(k){localStorage.removeItem(K(k))}function done(d,n){return get("done:"+d+":"+n)==="1"}function log(d,n){return get("log:"+d+":"+n)}function fb(d,n){return get("fb:"+d+":"+n)}
+function nextWt(e){if(!e[1])return "Samma";let f=fb(state.day,e[0]);return (e[1]+(f==="Lätt"?5:f==="Lagom"?2.5:0))+" kg"}
+function nextDay(){for(const d of weekly){if(!(P[d[0]]||[]).every(e=>done(d[0],e[0])))return d[0]}return "monday"}
+function render(){renderWeek();renderTop();renderEx();renderHist();renderCharts();["weight","waist","energy","night"].forEach(id=>{let el=document.getElementById(id);el.value=get("daily:"+id);el.oninput=e=>set("daily:"+id,e.target.value)})}
+function renderWeek(){let el=document.getElementById("week");el.innerHTML="";weekly.forEach(d=>{let b=document.createElement("button");b.className="day"+(state.day===d[0]?" active":"");b.innerHTML=`<div class="title">${d[1]}</div><div>${d[2]}</div><div class="small">${d[3]}</div>`;b.onclick=()=>{state.day=d[0];render()};el.appendChild(b)})}
+function renderTop(){let rec=weekly.find(d=>d[0]===nextDay());document.getElementById("today").textContent=rec[1]+" - "+rec[2];let plan=P[state.day]||[],c=plan.filter(e=>done(state.day,e[0])).length;document.getElementById("progText").textContent=c+"/"+plan.length+" övningar klara";document.getElementById("progBar").style.width=(plan.length?Math.round(c/plan.length*100):0)+"%";document.getElementById("timer").textContent=state.t>0?fmt(state.t):"Klar";document.getElementById("start").textContent=state.started?"Avsluta passläge":"Starta pass"}
+function tag(e){return e[6]===1?'<span class="badge">Bål</span>':e[6]===2?'<span class="badge">Armar</span>':e[6]===3?'<span class="badge">Rygg underhåll</span>':""}
+function renderEx(){let w=document.getElementById("exercises");w.innerHTML="";(P[state.day]||[]).forEach((e,i)=>{let is=done(state.day,e[0]),box=document.createElement("div");box.className="exercise"+(is?" done":"");box.innerHTML=`<div class="between"><div><div class="title">${i+1}. ${e[0]}${tag(e)}</div><div class="muted">Mål: ${e[3]} set x ${e[2]} ${e[5]||"reps"} ${e[1]?"@ "+e[1]+" kg":""}</div><div class="tiny">Vila: ${e[4]} sek</div></div><button class="check ${is?"on":""}">✓</button></div><div class="exgrid"><input value="${log(state.day,e[0]).replaceAll('"','&quot;')}" placeholder="${state.started?'T.ex. 50 x 8, 8, 8':'Vad körde du?'}"><div class="row"><button class="btn ${fb(state.day,e[0])==='Lätt'?'dark':''}">Lätt</button><button class="btn ${fb(state.day,e[0])==='Lagom'?'dark':''}">Lagom</button><button class="btn ${fb(state.day,e[0])==='Tungt'?'dark':''}">Tungt</button></div></div><div class="between" style="margin-top:12px"><div class="muted">Nästa gång: <b>${nextWt(e)}</b></div><button class="btn">Starta vila</button></div>`;let bs=box.querySelectorAll("button");bs[0].onclick=()=>{set("done:"+state.day+":"+e[0],is?"0":"1");render()};box.querySelector("input").oninput=x=>set("log:"+state.day+":"+e[0],x.target.value);bs[1].onclick=()=>{set("fb:"+state.day+":"+e[0],"Lätt");render()};bs[2].onclick=()=>{set("fb:"+state.day+":"+e[0],"Lagom");render()};bs[3].onclick=()=>{set("fb:"+state.day+":"+e[0],"Tungt");render()};bs[4].onclick=()=>setTimer(e[4]);w.appendChild(box)})}
+function clearDay(d){(P[d]||[]).forEach(e=>{del("done:"+d+":"+e[0]);del("log:"+d+":"+e[0]);del("fb:"+d+":"+e[0])})}
+function saveWorkout(){let d=state.day,h=JSON.parse(get("history")||"[]");let entry={date:new Date().toISOString().slice(0,10),dayLabel:(weekly.find(x=>x[0]===d)||[])[1],weight:get("daily:weight"),waist:get("daily:waist"),energy:get("daily:energy"),night:get("daily:night"),items:(P[d]||[]).map(e=>({name:e[0],log:log(d,e[0]),next:nextWt(e)}))};set("history",JSON.stringify([entry,...h].slice(0,40)));clearDay(d);["weight","waist","energy","night"].forEach(id=>del("daily:"+id));state.day=nextDay();let m=document.getElementById("msg");m.style.display="block";setTimeout(()=>m.style.display="none",3500);render()}
+function renderHist(){let h=JSON.parse(get("history")||"[]"),el=document.getElementById("history");el.innerHTML="";if(!h.length){el.innerHTML='<div class="history muted">När första passet sparas dyker det upp här.</div>';return}h.slice(0,10).forEach((x,i)=>{let div=document.createElement("div");div.className="history";div.innerHTML=`<div class="between"><div><div class="title">${x.dayLabel}</div><div class="tiny">${x.date}</div></div><button class="btn danger">Ta bort</button></div><div class="tiny">Vikt: ${x.weight||"-"} | Midja: ${x.waist||"-"} | Energi: ${x.energy||"-"} | Kväll: ${x.night||"-"}</div><div class="stack" style="margin-top:10px">${(x.items||[]).slice(0,4).map(it=>`<div class="between"><span>${it.name}</span><span class="tiny">${it.log||it.next}</span></div>`).join("")}</div>`;div.querySelector("button").onclick=()=>{if(confirm("Ta bort detta loggade pass?")){h.splice(i,1);set("history",JSON.stringify(h));render()}};el.appendChild(div)})}
+function num(v){let m=String(v||"").match(/(\d+(?:[.,]\d+)?)/);return m?Number(m[1].replace(",",".")):null}
+function chart(id,values,label){let el=document.getElementById(id);let data=values.filter(x=>x.v!==null).slice(-8);if(!data.length){el.innerHTML='<div class="muted">Ingen data ännu</div>';return}let vals=data.map(x=>x.v),min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;el.innerHTML=`<div class="muted">${label}: senaste ${data.length} mätningar</div><div class="bars">${data.map(x=>`<div class="barcol" title="${x.date}: ${x.v}" style="height:${20+((x.v-min)/range)*95}px"></div>`).join("")}</div><div class="labels">${data.map(x=>`<span>${x.date.slice(5)}</span>`).join("")}</div>`}
+function renderCharts(){let h=JSON.parse(get("history")||"[]").slice().reverse();chart("weightChart",h.map(x=>({date:x.date,v:num(x.weight)})),"Vikt");chart("waistChart",h.map(x=>({date:x.date,v:num(x.waist)})),"Midja")}
+function setTimer(s){state.t=s;if(state.int)clearInterval(state.int);state.int=setInterval(()=>{state.t--;renderTop();if(state.t<=0){clearInterval(state.int);state.t=0;renderTop()}},1000);renderTop()}function fmt(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+document.getElementById("start").onclick=()=>{state.started=!state.started;render()};state.day=nextDay();render();
 </script>
 </body>
 </html>
